@@ -1,0 +1,19 @@
+version: "2.15"
+services:
+  service:
+    build: .
+    links:
+      - database
+    depends_on:
+      - database
+    env_file:
+      - database.docker.env
+    ports:
+      - "8080:8080"
+  database:
+    hostname: database
+    image: "postgres:15.1-alpine"
+    env_file:
+      - database.docker.env
+    ports:
+      - "5432:5432"
