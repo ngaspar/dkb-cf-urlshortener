@@ -1,22 +1,22 @@
 package net.ngaspar.urlshortener.controller
 
-import jakarta.persistence.*
 import net.ngaspar.urlshortener.model.UrlEntry
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import net.ngaspar.urlshortener.model.UrlEntryRequest
+import net.ngaspar.urlshortener.service.UrlShortenerServiceDirtyImpl
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 
 @RestController
-class UrlEntryResource {
+class UrlEntryResource @Autowired constructor(private val service: UrlShortenerServiceDirtyImpl){
 
     /*
      * Returns the original URL corresponding to a given hash
      */
     @GetMapping("/stretch/{hash}")
     fun getUrlFromHash(@PathVariable hash: String): String {
-        TODO("Not implemented yet")
+        return service.fetchLongUrlByHash(hash)?.url ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No URL exists for the hash $hash")
     }
 
     /*
@@ -24,7 +24,7 @@ class UrlEntryResource {
      */
     @GetMapping("/stats/{hash}")
     fun getUrlStatsFromHash(@PathVariable hash: String): UrlEntry {
-        TODO("Not implemented yet")
+        return service.fetchUrlEntryByHash(hash)?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "No URL exists for the hash $hash")
     }
 
     /*
@@ -32,8 +32,7 @@ class UrlEntryResource {
      * in the repository; otherwise returns existing one
      */
     @PostMapping("/shrink/")
-    fun createOrGetHashFromUrl(@RequestBody request: String): String {
-        TODO("Not implemented yet")
+    fun createOrGetHashFromUrl(@RequestBody request: UrlEntryRequest): String {
+        return service.fetchOrCreateShortUrl(request.url)?.hash ?: throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating hash for URL ${request.url}")
     }
 }
-
